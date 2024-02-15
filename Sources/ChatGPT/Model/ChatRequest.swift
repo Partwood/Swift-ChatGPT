@@ -11,6 +11,24 @@ public struct ChatRequest: Codable, Jsonable {
    var messages: [Message]
    var temperature: Float = 0.7 // 1 is the default, lower values are less random
    
+   func merge(_ completion: Completion,followUp followUpMessages: [Message]) -> ChatRequest {
+      var mergedMessages: [Message] = [Message](self.messages)
+      
+      completion.choices.forEach({ choice in
+         mergedMessages.append(choice.message)
+      })
+      
+      mergedMessages.append(contentsOf: followUpMessages)
+      
+      return ChatRequest(model: self.model,messages: mergedMessages,temperature: self.temperature)
+   }
+
+   func merge(_ completion: Completion,followUp followUpMessages: [String]) -> ChatRequest {
+      let newMessages: [Message] = followUpMessages.map({ Message(content: $0) })
+      
+      return merge(completion, followUp: newMessages)
+   }
+
    public func toJson() -> String? {
       return jsonEncode(object: self)
    }
