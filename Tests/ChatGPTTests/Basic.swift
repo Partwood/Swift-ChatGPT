@@ -63,7 +63,7 @@ final class Basic: XCTestCase {
       let chat = ChatGPT.chat(apiKey: apiKey, organization: "organization")
       
       waitOnResponse = true
-      chat.request(message: "What time is it?",completionHandler: { completion in
+      chat.request(message: "If it is 8 am in Boston, MA, what time is it in Gary, In?",completionHandler: { completion in
          XCTAssertNotNil(completion)
          if let result = completion {
             debug("\(result)")

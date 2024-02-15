@@ -6,9 +6,9 @@ General chat usage examples can be found in tests, some examples follow
 
 Main structures with value: ChatGPT.chat, ChatRequest, Completion, Choice, Message
 
+```
 // With a request object
 let request = ChatRequest(messages: [Message(content: "Tell me a story")])
-
 let chat = ChatGPT.chat(apiKey: apiKey)
 chat.request(chatRequest: BadJsonable(),completionHandler: { completion in
    if let validCompletion = completion {
@@ -28,3 +28,25 @@ chat.request(message: "Tell me a story",completionHandler: { completion in
       })
    }
 })
+
+// Async operations (in iOS 13 or higher)
+
+// With a request object
+let request = ChatRequest(messages: [Message(content: "Tell me a story")])
+
+let chat = ChatGPT.chat(apiKey: apiKey)
+if let completion = await chat.request(chatRequest: request) {
+   completion.choices.forEach({ choice in
+      debug(choice.message.content)
+   })
+}
+
+// Just a string
+let chat = ChatGPT.chat(apiKey: apiKey)
+
+if let completion = await chat.request(message: "Tell me a story") {
+   completion.choices.forEach({ choice in
+      debug(choice.message.content)
+   })
+}
+```

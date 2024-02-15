@@ -32,7 +32,7 @@ class HTTPRequest {
          })
       }
    }
-
+   
    private func getJson(url: URL,handler: @escaping ((_ response:URLResponse?,_ data:Foundation.Data)->Void),errorHandler: @escaping ((_ response:URLResponse?, _ error:Error?)->Void)) {
       debug("url:"+url.debugDescription)
       
@@ -104,5 +104,60 @@ class HTTPRequest {
       }
       
       handler(response,validatedData)
+   }
+}
+
+/// Async
+@available(iOS 13.0.0, *)
+extension HTTPRequest {
+   func postJson(url: String,content: String) async -> (data: Foundation.Data?,response: URLResponse?,error: Error?) {
+      if let constructedUrl = URL(string: "https://api.openai.com/v1/chat/completions") {
+         let result = await postJson(url: constructedUrl,content: content)
+         return result
+      }
+      
+      logError("Invalid url")
+      return (nil, nil, nil)
+   }
+
+   private func postJson(url: URL,content: String) async -> (data: Foundation.Data?,response: URLResponse?,error: Error?) {
+      debug("url:"+url.debugDescription)
+      
+      var request = URLRequest(url: url)
+      request.httpMethod = "POST"
+      request.httpBody = content.data(using: String.Encoding.utf8)
+      request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+      request.setValue(authorization, forHTTPHeaderField: "Authorization")
+      
+      if let validatedSession = getSession() {
+         do {
+            let response = try await validatedSession.data(for: request)
+            return handleResponse(response.0, response.1)
+         } catch {
+            logError(error)
+            return (nil, nil, error)
+         }
+      }
+      
+      logError("No session")
+      return (nil, nil, nil)
+   }
+
+   private func handleResponse(_ data: Foundation.Data,_ response: URLResponse) -> (data: Foundation.Data?,response: URLResponse?,error: Error?) {
+      if let validatedResponse:HTTPURLResponse = response as? HTTPURLResponse {
+         if (200...299).contains(validatedResponse.statusCode) {
+            // Valid
+            debug("Valid response statusCode:\(validatedResponse.statusCode)")
+         } else {
+            // Bad response
+            logWarn("statusCode:\(validatedResponse.statusCode)")
+            logWarn("validatedResponse:\(validatedResponse)")
+            return (nil, response, nil)
+         }
+      } else {
+         logWarn("No HTTPURLResponse")
+      }
+      
+      return (data, response, nil)
    }
 }
