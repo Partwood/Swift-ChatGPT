@@ -16,19 +16,23 @@ Main structures:
 
 ## Examples
 
+### With a request object
 ```
 // With a request object
 let request = ChatRequest(messages: [Message(content: "Tell me a story")])
 
 let chat = ChatGPT.chat(apiKey: apiKey)
-chat.request(chatRequest: BadJsonable(),completionHandler: { completion in
+chat.request(chatRequest: request,completionHandler: { completion in
    if let validCompletion = completion {
       validCompletion.choices.forEach({ choice in
          print(choice.message.content)
       })
    }
 })
+```
 
+### Just a string
+```
 // Just a string
 let chat = ChatGPT.chat(apiKey: apiKey)
 chat.request(message: "Tell me a story",completionHandler: { completion in
@@ -38,7 +42,10 @@ chat.request(message: "Tell me a story",completionHandler: { completion in
       })
    }
 })
+```
 
+### Building on an existing conversation
+```
 // Building on an existing conversation
  let request = ChatRequest(messages: [Message(content: "Hello, how are you?")])
 
@@ -63,6 +70,7 @@ chat.request(message: "Tell me a story",completionHandler: { completion in
  
 ## Async Examples (in iOS 13 or higher)
 
+### With a request object
 ```
 // With a request object
 let request = ChatRequest(messages: [Message(content: "Tell me a story")])
@@ -73,7 +81,10 @@ if let completion = await chat.request(chatRequest: request) {
       debug(choice.message.content)
    })
 }
+```
 
+### Just a string
+```
 // Just a string
 let chat = ChatGPT.chat(apiKey: apiKey)
 
